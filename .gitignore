@@ -1,0 +1,13 @@
+.DS_Store
+*.log
+*.datatable
+*.dat
+!support/vendor-xwalk.dat
+!support/barcode-xlate.datatable.gpg
+*.csv
+*.gz
+*.xz
+*.bz2
+logs/*
+!logs/*.lisp
+notes
