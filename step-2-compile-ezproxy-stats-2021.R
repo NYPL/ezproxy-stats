@@ -22,6 +22,7 @@ library(magrittr)
 library(stringr)
 library(libbib)     # version >- 1.6.2
 library(lubridate)
+library(openssl)
 
 # ------------------------------ #
 
@@ -52,8 +53,8 @@ setkey(xlate, "barcode")
 xlate[proxy] -> proxy
 
 
-library(openssl)
 proxy[, barcode:=md5(barcode)]
+
 
 venx <- fread("./support/vendor-xwalk.dat")
 setkey(venx, "url")
