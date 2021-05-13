@@ -2,12 +2,17 @@
 
 
 (defvar /all-logs/ (zsh "find logs | ack '2021-' | ack 'log$' | sort" :split t))
+
+; remove last (incomplete) log entry
+(setq /all-logs/ (reverse (cdr (reverse /all-logs/))))
 (defvar /count/ (length /all-logs/))
 
+(defconstant +updated-date+ (~e (car (last /all-logs/)) •(\d{4}-\d{2}-\d{2})•))
+(defconstant +output-file+ (fn "intermediate/cleaned-logs-~A.dat" +updated-date+))
 
 (format *error-output* (yellow "about to process files~%~%"))
 
-(with-a-file "intermediate/cleaned-logs.dat" :w
+(with-a-file +output-file+  :w
   (format stream! "~A~%" (delim '("ip" "barcode" "session"
                                   "date_and_time" "url" "fullurl")))
   (for-each/list /all-logs/

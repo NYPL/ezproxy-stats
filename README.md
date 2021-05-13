@@ -40,7 +40,7 @@ Developed on Debian GNU/Linux 10
 
 The first step is to `rsync` the log directory from the EZproxy web
 server to the local directory called `logs`.
-You can do this by running `./sync-with-log-server.sh`.
+You can do this by running `./step-0-sync-logs.sh`.
 That file also contains comments/reminders that you have to (a)
 be connected to the VPN, and (b) add `ezproxy` to your `/etc/hosts`
 or (better) `~/.ssh/config`.
@@ -53,7 +53,7 @@ Once the logs have finished (one way) syncing, run
 intermediate data set containing the IP address, patron barcode,
 session, datetime of access, a shortened URL, and the full URL.
 This script (in addition to concatenating all daily logs into one file)
- excludes certain log entries, cleans URLs, and converts the dates
+excludes certain log entries, cleans URLs, and converts the dates
 into ISO 8601 format.
 This tab-separated file is stored in `./intermediate/cleaned-logs.dat`.
 

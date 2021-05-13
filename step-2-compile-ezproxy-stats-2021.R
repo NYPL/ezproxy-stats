@@ -29,6 +29,7 @@ library(openssl)
 
 proxy <- fread_plus_date("intermediate/cleaned-logs.dat",
                          colClasses="character")
+lb_date <- attr(proxy, "lb.date")
 
 proxy[, ip:=NULL]
 
@@ -52,21 +53,16 @@ setkey(xlate, "barcode")
 
 xlate[proxy] -> proxy
 
-
 proxy[, barcode:=md5(barcode)]
-
 
 venx <- fread("./support/vendor-xwalk.dat")
 setkey(venx, "url")
 setkey(proxy, "url")
 venx[proxy] -> proxy
 
-names(proxy)
-
 setcolorder(proxy, c("session", "ptype", "date_and_time", "vendor",
                      "url", "barcode", "barcode_category",
                      "homebranch", "fullurl"))
-
 
 # This part needs work
 proxy[, extract:=str_replace(str_extract(fullurl,
@@ -76,17 +72,10 @@ proxy[, extract:=str_replace(str_extract(fullurl,
 setkey(proxy, NULL)
 setorder(proxy, "date_and_time")
 
-
 proxy[, just_date:=ymd(str_sub(date_and_time, 1, 10))]
 
-
-last_valid_date <- proxy[, max(just_date)-1]
-
-set_lb_date(proxy, as.character(last_valid_date))
-
-proxy <- proxy[just_date>=ymd("2021-01-01") & just_date<=last_valid_date, ]
+set_lb_date(proxy, lb_date)
 
 proxy %>%
   fwrite_plus_date("target/exproxy_2021-up-to.dat.gz")
-
 
