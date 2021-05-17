@@ -19,7 +19,6 @@ Assumes a fairly recent version of R, and the following R packages
 - `data.table` (version 1.14.1 or above)
 - `magrittr`
 - `stringr`
-- `lubridate`
 - `openssl`
 - `libbib` (any version 1.6.2 or above)
 

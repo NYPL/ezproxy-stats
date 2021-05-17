@@ -21,7 +21,6 @@ library(data.table)
 library(magrittr)
 library(stringr)
 library(libbib)     # version >- 1.6.2
-library(lubridate)
 library(openssl)
 
 # ------------------------------ #
@@ -72,7 +71,7 @@ proxy[, extract:=str_replace(str_extract(fullurl,
 setkey(proxy, NULL)
 setorder(proxy, "date_and_time")
 
-proxy[, just_date:=ymd(str_sub(date_and_time, 1, 10))]
+proxy[, just_date:=as.Date(str_sub(date_and_time, 1, 10))]
 
 set_lb_date(proxy, lb_date)
 
