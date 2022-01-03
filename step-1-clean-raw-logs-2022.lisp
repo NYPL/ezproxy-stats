@@ -1,7 +1,7 @@
 #!/usr/local/bin/lispscript
 
 
-(defvar /all-logs/ (zsh "find logs | ack '2021-' | ack 'log$' | sort" :split t))
+(defvar /all-logs/ (zsh "find logs | ack '2022-' | ack 'log$' | sort" :split t))
 
 ; remove last (incomplete) log entry
 (setq /all-logs/ (reverse (cdr (reverse /all-logs/))))
