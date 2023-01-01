@@ -76,5 +76,5 @@ proxy[, just_date:=as.Date(str_sub(date_and_time, 1, 10))]
 set_lb_date(proxy, lb_date)
 
 proxy %>%
-  fwrite_plus_date("target/ezproxy_2022-up-to.dat.gz")
+  fwrite_plus_date("target/ezproxy_2023-up-to.dat.gz")
 
