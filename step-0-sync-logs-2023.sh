@@ -6,4 +6,4 @@
 # log server
 # OR (even better) add it to ~/.ssh/config
 
-rsync -Phaz ezproxy:/usr/local/ezproxy/logs ./
+rsync -Phaz ezproxy:/usr/local/ezproxy/logs/i.ezproxy.nypl.org.2023* ./logs
