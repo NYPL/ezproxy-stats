@@ -36,32 +36,17 @@ const string make_tab_delimited(const string& ip, const string& barcode,
 }
 
 
-// void process_line(string* all_fields, const string& line) {
-//     uint8_t counter = 0;
-//     string item;
-//     stringstream ss (line);
-//
-//     while (getline(ss, item, ' ')) {
-//         all_fields[counter] = item;
-//         counter++;
-//         if (counter > 5)
-//             return;
-//     }
-// }
-
-const vector<string> process_line(const string& line) {
-    vector<string> all_fields;
-    uint8_t counter {0};
+void process_line(string* all_fields, const string& line) {
+    uint8_t counter = 0;
     string item;
-    stringstream ss(line);
+    stringstream ss (line);
 
     while (getline(ss, item, ' ')) {
-        all_fields.push_back(item);
+        all_fields[counter] = item;
         counter++;
-        if (counter > 6)
-            break;
+        if (counter > 5)
+            return;
     }
-    return all_fields;
 }
 
 
@@ -110,26 +95,33 @@ int main() {
         ifstream infile(item);
         string line;
         while (getline(infile, line)) {
-            vector<string> tmp = process_line(line);
+            string tmp[6] = {"", "", "", "", "", ""};
+            process_line(&tmp, line);
 
             string ip       = tmp[0];
             string barcode  = tmp[1];
             string sessionp = tmp[2];
             string date     = tmp[3];
             string url      = tmp[6];
+            cout << "ip: " << tmp[0] << endl;
+            cout << "url: " << tmp[6] << endl;
+            cout << "url: " << url << endl;
             string fullurl  = url;
+            cout << "full url: " << fullurl << endl << endl;
 
             if (barcode == "-")
                 continue;
 
             // fixing urls
-            RE2::Replace(&url, re1, "\\1");
+            // RE2::Replace(&url, re1, "\\1");
 
             date = fix_whole_date(date);
 
             outfile << make_tab_delimited(ip, barcode, sessionp, date, url,
                                           fullurl) << endl;
+            break;
         }
+        break;
         counter++;
     }
     outfile.close();

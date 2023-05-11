@@ -12,13 +12,15 @@
 (defconstant +updated-date+ (~e (car (last /all-logs/)) •(\d{4}-\d{2}-\d{2})•))
 (defconstant +output-file+ (fn "intermediate/cleaned-logs-~A.dat" +updated-date+))
 
+(die +output-file+)
+
 (format *error-output* (yellow "about to process files~%~%"))
 
 (with-a-file +output-file+  :w
   (format stream! "~A~%" (delim '("ip" "barcode" "session"
                                   "date_and_time" "url" "fullurl")))
   (for-each/list /all-logs/
-    (progress-bar index! /count/ :out-of t)
+    ; (progress-bar index! /count/ :out-of t)
     (for-each/line value!
       « (destructuring-bind
           (ip barcode sessionp date garb1 garb2 url garb3 garb4 garb5)
@@ -53,7 +55,7 @@
           (format stream! "~A~%" (delim (list ip barcode sessionp
                                               date url fullurl))))
         or do (continue!) » )
-    (break!)
+      (ft "~A~%" index!)
     ))
 
 
