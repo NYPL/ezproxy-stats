@@ -1,8 +1,10 @@
 
+#include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
-#include "glob.hpp"
+#include "glob.h"
 
 
 using namespace std;
@@ -34,4 +36,5 @@ int main() {
     cout << "Last: " << input_files[input_files.size()-1] << endl;
 
 }
+
 
