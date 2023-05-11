@@ -7,12 +7,13 @@
 #include <cmath>
 #include <algorithm>
 
-#include <boost/algorithm/string.hpp>
+#include <re2/re2.h>
 
 #include "glob.h"
 
 
 using namespace std;
+using namespace re2;
 
 
 const vector<string> get_files() {
@@ -89,9 +90,7 @@ int main() {
         ifstream infile(item);
         string line;
         while (getline(infile, line)) {
-            // vector<string> tmp = process_line(line);
-            vector<string> tmp;
-            boost::split(tmp, line, boost::is_any_of(" "));
+            vector<string> tmp = process_line(line);
 
             string ip       = tmp[0];
             string barcode  = tmp[1];
@@ -104,12 +103,13 @@ int main() {
                 continue;
 
             // fixing urls
-            regex re1 { "^https?[^A-Za-z]*(.+?):\\d.+$" };
-            url = regex_replace(url, re1, "$1");
+            RE2 re1  { "^https?[^A-Za-z]*(.+?):\\d.+$" };
+            RE2::Replace(&url, re1, "\\1");
 
             // fixing dates
-            regex re2 { "\\[(\\d+)/(.+?)/(\\d+):(\\d+):(\\d+):(\\d+)" };
-            date = fix_month(regex_replace(date, re2, "$3-$2-$1 $4:$5:$6"));
+            RE2 re2 { "\\[(\\d+)/(.+?)/(\\d+):(\\d+):(\\d+):(\\d+)" };
+            RE2::Replace(&date, re2, "\\3-\\2-\\1 \\4:\\5:\\6");
+            date = fix_month(date);
 
             outfile << make_tab_delimited(ip, barcode, sessionp, date, url,
                                           fullurl) << endl;
