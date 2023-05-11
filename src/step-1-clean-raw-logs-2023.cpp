@@ -28,10 +28,10 @@ const vector<string> get_files() {
     return input_files;
 }
 
-const string make_tab_delimited(const string ip, const string barcode,
-                                const string session,
-                                const string date_and_time, const string url,
-                                const string fullurl) {
+const string make_tab_delimited(const string& ip, const string& barcode,
+                                const string& session,
+                                const string& date_and_time, const string& url,
+                                const string& fullurl) {
     return ip + "\t" + barcode + "\t" + session + "\t" + date_and_time +
            "\t" + url + "\t" + fullurl;
 }
