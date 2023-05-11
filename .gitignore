@@ -11,3 +11,7 @@
 logs/*
 !logs/*.lisp
 notes
+*.o
+*.a
+*.so
+step-1-clean-raw-logs-2023
