@@ -52,6 +52,8 @@
 
           (format stream! "~A~%" (delim (list ip barcode sessionp
                                               date url fullurl))))
-        or do (continue!) » )))
+        or do (continue!) » )
+    (break!)
+    ))
 
 
