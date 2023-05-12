@@ -22,17 +22,22 @@ Assumes a fairly recent version of R, and the following R packages
 - `openssl`
 - `libbib` (any version 1.6.2 or above)
 
-In addition to R, step 1 requires a Common Lisp compiler or interpreter.
-[SBCL](www.sbcl.org/) is the Lisp compiler this was developed with.
-You also have to install the `clix` package included in this project
-in the `dependencies` directory. You might have to play around
-with `step-1-clean-raw-logs-YEAR.lisp` to get it working for your
-system.
+In addition to R, step 1 requires a compilation of a C++ program. Running
+`make` in the root directory will produce the proper executable
+(`step-1-clean-raw-logs-YEAR`) in the same directory, given that you have
+a C++ toolchain (`build-essential`, etc...) and `libre2-dev` installed.
+
+<sup>Fun note: step 1 used to be in lisp but I wanted to see if I can
+improve the perfomance any by switching to C++. My first attempt was
+10x slower (the c++ standard regex library isn't so fast). After a lot of
+trial and error, I finally got it down to 33% of the time it took the lisp
+script to run. Having said that, I estimate I'd have to (busy-wait) run this
+over a thousand times to make back my development time investment.</sup>
 
 Lastly, `OpenSSL` must be installed for the `openssl` R package
 to dynamically link to.
 
-Developed on Debian GNU/Linux 10
+Developed on Debian GNU/Linux 10, 11
 
 
 ### build instructions
@@ -44,11 +49,11 @@ That file also contains comments/reminders that you have to (a)
 be connected to the VPN, and (b) add `ezproxy` to your `/etc/hosts`
 or (better) `~/.ssh/config`.
 
-If you're just beginning to use this now, the logs going back to the
-beginning of 2021 will no longer be available.
+If you're just beginning to use this now, many of the logs going back to the
+will no longer be available.
 
 Once the logs have finished (one way) syncing, run
-`./step-1-clean-raw-logs-2021.lisp`. This produces a single, cleaned,
+`./step-1-clean-raw-logs-YEAR`. This produces a single, cleaned,
 intermediate data set containing the IP address, patron barcode,
 session, datetime of access, a shortened URL, and the full URL.
 This script (in addition to concatenating all daily logs into one file)
@@ -56,7 +61,7 @@ excludes certain log entries, cleans URLs, and converts the dates
 into ISO 8601 format.
 This tab-separated file is stored in `./intermediate/cleaned-logs.dat`.
 
-Finally, run the R script `./step-2-compile-ezproxy-stats-2021.R`.
+Finally, run the R script `./step-2-compile-ezproxy-stats-YEAR.R`.
 This is where most of the processing takes place. It, among other things:
 
 - (irreversibly) hashes the patron barcode
