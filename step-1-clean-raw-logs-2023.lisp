@@ -3,7 +3,7 @@
 
 (defvar /all-logs/ (zsh "find logs | ack '2023-' | ack 'log$' | sort" :split t))
 
-(when (>= (length /all-logs/) 365)
+(unless (>= (length /all-logs/) 365)
   ; remove last (incomplete) log entry
   (setq /all-logs/ (reverse (cdr (reverse /all-logs/)))))
 
@@ -11,8 +11,6 @@
 
 (defconstant +updated-date+ (~e (car (last /all-logs/)) •(\d{4}-\d{2}-\d{2})•))
 (defconstant +output-file+ (fn "intermediate/cleaned-logs-~A.dat" +updated-date+))
-
-(die +output-file+)
 
 (format *error-output* (yellow "about to process files~%~%"))
 
@@ -54,8 +52,6 @@
 
           (format stream! "~A~%" (delim (list ip barcode sessionp
                                               date url fullurl))))
-        or do (continue!) » )
-      (ft "~A~%" index!)
-    ))
+        or do (continue!) » )))
 
 

@@ -27,6 +27,7 @@ const vector<string> get_files() {
     return input_files;
 }
 
+
 const string make_tab_delimited(const string& ip, const string& barcode,
                                 const string& session,
                                 const string& date_and_time, const string& url,
@@ -36,32 +37,17 @@ const string make_tab_delimited(const string& ip, const string& barcode,
 }
 
 
-// void process_line(string* all_fields, const string& line) {
-//     uint8_t counter = 0;
-//     string item;
-//     stringstream ss (line);
-//
-//     while (getline(ss, item, ' ')) {
-//         all_fields[counter] = item;
-//         counter++;
-//         if (counter > 5)
-//             return;
-//     }
-// }
-
-const vector<string> process_line(const string& line) {
-    vector<string> all_fields;
-    uint8_t counter {0};
+void process_line(string* all_fields, const string& line) {
+    uint8_t counter = 0;
     string item;
-    stringstream ss(line);
+    stringstream ss (line);
 
     while (getline(ss, item, ' ')) {
-        all_fields.push_back(item);
+        all_fields[counter] = item;
         counter++;
         if (counter > 6)
-            break;
+            return;
     }
-    return all_fields;
 }
 
 
@@ -104,13 +90,16 @@ int main() {
     outfile << make_tab_delimited("ip", "barcode", "session", "date_and_time",
                                   "url", "fullurl") << endl;
 
+    // reusing this to store the necessary fields
+    string tmp[7];
+
     for (auto& item : input_files) {
         cout << round(counter/count*100) << endl;
 
         ifstream infile(item);
         string line;
         while (getline(infile, line)) {
-            vector<string> tmp = process_line(line);
+            process_line(tmp, line);
 
             string ip       = tmp[0];
             string barcode  = tmp[1];
