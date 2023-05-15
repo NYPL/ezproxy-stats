@@ -41,7 +41,7 @@ string display_time() {
 }
 
 
-void handle_sigint(int signum) {
+void handle_sigint(const int signum) {
     cerr << endl << endl << fg::red << display_time() << "caught SIGINT" << endl;
     outfile.close();
     indicators::show_console_cursor(true);
@@ -52,7 +52,7 @@ void handle_sigint(int signum) {
 
 const vector<string> get_files() {
     vector<string> input_files;
-    for (auto& p : glob::glob("./logs/i.ezproxy.nypl.org.2023*.log")) {
+    for (const auto& p : glob::glob("./logs/i.ezproxy.nypl.org.2023*.log")) {
         input_files.push_back(p);
     }
     sort(input_files.begin(), input_files.end());
@@ -135,7 +135,7 @@ int main() {
 
     show_console_cursor(false);
 
-    for (auto& item : input_files) {
+    for (const auto& item : input_files) {
         uint8_t perc = round(counter/count*100);
         bar.set_progress(perc);
         bar.set_option(option::PostfixText{ "  " + to_string(int(counter)) +
