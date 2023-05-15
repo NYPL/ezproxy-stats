@@ -52,7 +52,7 @@ void handle_sigint(const int signum) {
 
 const vector<string> get_files() {
     vector<string> input_files;
-    for (const auto& p : glob::glob("./logs/i.ezproxy.nypl.org.2023*.log")) {
+    for (const auto& p : glob::glob("./logs/i.ezproxy.nypl.org.2023-01*.log")) {
         input_files.push_back(p);
     }
     sort(input_files.begin(), input_files.end());
@@ -72,17 +72,19 @@ const string make_tab_delimited(const string& ip, const string& barcode,
 }
 
 
-void process_line(string* all_fields, const string& line) {
-    uint8_t counter = 0;
-    string item;
+const tuple<string, string, string, string, string> process_line(const string& line) {
     stringstream ss (line);
+    string ip, barcode, sessionp, date, url, garbage;
 
-    while (getline(ss, item, ' ')) {
-        all_fields[counter] = item;
-        counter++;
-        if (counter > 6)
-            return;
-    }
+    getline(ss, ip, ' ');
+    getline(ss, barcode, ' ');
+    getline(ss, sessionp, ' ');
+    getline(ss, date, ' ');
+    getline(ss, garbage, ' ');
+    getline(ss, garbage, ' ');
+    getline(ss, url, ' ');
+
+    return {ip, barcode, sessionp, date, url};
 }
 
 
@@ -130,9 +132,6 @@ int main() {
     outfile << make_tab_delimited("ip", "barcode", "session", "date_and_time",
                                   "url", "fullurl") << endl;
 
-    // reusing this to store the necessary fields
-    string tmp[7];
-
     show_console_cursor(false);
 
     for (const auto& item : input_files) {
@@ -144,14 +143,10 @@ int main() {
 
         ifstream infile(item);
         string line;
-        while (getline(infile, line)) {
-            process_line(tmp, line);
+        string ip, barcode, sessionp, date, url;
 
-            string ip       = tmp[0];
-            string barcode  = tmp[1];
-            string sessionp = tmp[2];
-            string date     = tmp[3];
-            string url      = tmp[6];
+        while (getline(infile, line)) {
+            tie(ip, barcode, sessionp, date, url) = std::move(process_line(line));
             string fullurl  = url;
 
             if (barcode == "-")
