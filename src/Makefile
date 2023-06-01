@@ -3,8 +3,8 @@ EXE=step-1-clean-raw-logs-2023
 
 CXX = g++
 INC_DIR = ../include
-# CXXFLAGS = -Wall -std=c++17 -I$(INC_DIR) -O2 -lre2 -g -pg
-CXXFLAGS = -Wall -std=c++17 -I$(INC_DIR) -O2 -lre2
+CXXFLAGS = -Wall -std=c++20 -I$(INC_DIR) -O2 -lre2 -lfmt
+# CXXFLAGS += -g -pg
 SRCS = step-1-clean-raw-logs-2023.cpp glob.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
 

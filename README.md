@@ -25,7 +25,8 @@ Assumes a fairly recent version of R, and the following R packages
 In addition to R, step 1 requires a compilation of a C++ program. Running
 `make` in the root directory will produce the proper executable
 (`step-1-clean-raw-logs-YEAR`) in the same directory, given that you have
-a C++ toolchain (`build-essential`, etc...) and `libre2-dev` installed.
+a C++ toolchain (`build-essential`, etc...), `libfmt-dev`, and `libre2-dev`
+installed.
 
 <sup>Fun note: step 1 used to be in lisp but I wanted to see if I can
 improve the perfomance any by switching to C++. My first attempt was

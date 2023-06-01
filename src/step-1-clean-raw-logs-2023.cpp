@@ -10,6 +10,8 @@
 
 #include <re2/re2.h>
 
+#include <fmt/core.h>
+
 #include "glob.h"
 #include "indicators.hpp"
 #include "rang.hpp"
@@ -36,7 +38,7 @@ static ProgressBar bar{
 
 
 
-string display_time() {
+string display_time() noexcept {
     return ("[" + to_string(time(0)) + "]  ");
 }
 
@@ -50,9 +52,9 @@ void handle_sigint(const int signum) {
 }
 
 
-const vector<string> get_files() {
+const vector<string> get_files() noexcept {
     vector<string> input_files;
-    for (const auto& p : glob::glob("./logs/i.ezproxy.nypl.org.2023*.log")) {
+    for (const auto& p : glob::glob("./logs/i.ezproxy.nypl.org.2023-*.log")) {
         input_files.push_back(p);
     }
     sort(input_files.begin(), input_files.end());
@@ -63,16 +65,17 @@ const vector<string> get_files() {
 }
 
 
-const string make_tab_delimited(const string& ip, const string& barcode,
+inline const string make_tab_delimited(const string& ip, const string& barcode,
                                 const string& session,
                                 const string& date_and_time, const string& url,
-                                const string& fullurl) {
-    return ip + "\t" + barcode + "\t" + session + "\t" + date_and_time +
-           "\t" + url + "\t" + fullurl;
+                                const string& fullurl) noexcept {
+    return fmt::format("{}\t{}\t{}\t{}\t{}\t{}",
+                       ip, barcode, session, date_and_time, url, fullurl);
+
 }
 
 
-void process_line(string* all_fields, const string& line) {
+void process_line(string* all_fields, const string& line) noexcept {
     uint8_t counter = 0;
     string item;
     stringstream ss (line);
@@ -86,7 +89,7 @@ void process_line(string* all_fields, const string& line) {
 }
 
 
-const string fix_whole_date(const string& adate) {
+const string fix_whole_date(const string& adate) noexcept {
     const string day  = adate.substr(1, 2);
     const string year = adate.substr(8, 4);
     const string time = adate.substr(13, string::npos);
@@ -105,7 +108,7 @@ const string fix_whole_date(const string& adate) {
     else if (premonth == "Nov") premonth = "11";
     else if (premonth == "Dec") premonth = "12";
 
-    return year + "-" + premonth + "-" + day + " " + time;
+    return fmt::format("{}-{}-{} {}", year, premonth, day, time);
 }
 
 
@@ -115,16 +118,16 @@ int main() {
     signal(SIGINT, handle_sigint);
 
     cout << endl << endl << fg::gray << style::dim
-         << display_time() << "::alice glass:: HI!"
+         << display_time() << "::alice glass:: HI!" << style::reset
          << endl << style::bold << fg::cyan << display_time()
          << "Processing raw logs" << style::reset << endl << endl;
 
     const vector<string> input_files = get_files();
-    const uint16_t count = input_files.size();
+    const double count = input_files.size();
     const string last_date = input_files[count-1].substr(24, 10);
-    const string output_file = "intermediate/cleaned-logs-" + last_date + ".dat";
+    const string output_file = fmt::format("intermediate/cleaned-logs-{}.dat", last_date);
     const RE2 re1  { "^https?[^A-Za-z]*(.+?):\\d.+$" };
-    double counter { 1.0f };
+    uint16_t counter { 0 };
 
     outfile.open(output_file);
     outfile << make_tab_delimited("ip", "barcode", "session", "date_and_time",
@@ -136,11 +139,11 @@ int main() {
     show_console_cursor(false);
 
     for (const auto& item : input_files) {
-        uint8_t perc = round(counter/count*100);
+        ++counter;
+        uint8_t perc = static_cast<int>(round(counter/count*100));
+        bar.set_option(option::PostfixText{
+                fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
-        bar.set_option(option::PostfixText{ "  " + to_string(int(counter)) +
-                                            "/" + to_string(count) + "  " +
-                                            to_string(perc) + "%" });
 
         ifstream infile(item);
         string line;
@@ -165,7 +168,7 @@ int main() {
             outfile << make_tab_delimited(ip, barcode, sessionp, date, url,
                                           fullurl) << endl;
         }
-        counter++;
+        infile.close();
     }
     cout << endl << endl << style::bold << fg::cyan << display_time()
          << "Closing output file" << endl;
