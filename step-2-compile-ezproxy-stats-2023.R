@@ -47,17 +47,19 @@ categorize_barcode <- function(x){
 proxy[, barcode_category:=categorize_barcode(barcode)]
 
 setkey(proxy, "barcode")
-xlate <- readRDS("./support/barcode-xlate.datatable")
+
+
+xlate <- fread("./support/barcode-xlate.csv.gz")
 setkey(xlate, "barcode")
 
-xlate[proxy] -> proxy
+proxy %>% merge(xlate, all.x=TRUE) -> proxy
 
 proxy[, barcode:=md5(barcode)]
 
 venx <- fread("./support/vendor-xwalk.dat")
 setkey(venx, "url")
 setkey(proxy, "url")
-venx[proxy] -> proxy
+proxy %>% merge(venx, all.x=TRUE) -> proxy
 
 setcolorder(proxy, c("session", "ptype", "date_and_time", "vendor",
                      "url", "barcode", "barcode_category",
