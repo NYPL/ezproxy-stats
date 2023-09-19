@@ -2,10 +2,11 @@
 *.log
 *.datatable
 *.dat
+*.gz
 !support/vendor-xwalk.dat
 !support/barcode-xlate.datatable.gpg
+!support/barcode-xlate.csv.gz.asc
 *.csv
-*.gz
 *.xz
 *.bz2
 logs/*
