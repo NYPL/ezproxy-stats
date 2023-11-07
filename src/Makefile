@@ -1,23 +1,35 @@
 
 EXE=step-1-clean-raw-logs-2023
 
-CXX = g++
-INC_DIR = ../include
-CXXFLAGS = -Wall -std=c++20 -I$(INC_DIR) -O2 -lre2 -lfmt
-# CXXFLAGS += -g -pg
-SRCS = step-1-clean-raw-logs-2023.cpp glob.cpp
-OBJS=$(subst .cpp,.o,$(SRCS))
+CXX 	  := g++
+INCDIR    := ../include
+
+CXXFLAGS  := -std=c++2b -O2 -I. -Wall -Wextra -Werror -Wpedantic -Wshadow
+CXXFLAGS  += -Wconversion -Wsign-conversion -Wunreachable-code
+CXXFLAGS  += -Weffc++ -Wmissing-braces -Wnon-virtual-dtor -Winline
+CXXFLAGS  += -Wnormalized -Wold-style-cast -Wrange-loop-construct
+CXXFLAGS  += -Wreturn-local-addr -Wredundant-move -Wsuggest-final-types
+CXXFLAGS  += -Wsuggest-override -Wvirtual-inheritance -Wvirtual-move-assign
+CXXFLAGS  += -Wuninitialized -Wswitch-enum -Wswitch
+INCFLAGS  := -I$(INCDIR)
+LDLIBS    := -lre2 -lfmt
+
+SRCS      := step-1-clean-raw-logs-2023.cpp glob.cpp
+OBJS      := $(subst .cpp,.o,$(SRCS))
 
 .PHONY: all clean
 
 all: $(EXE)
 	cp $(EXE) ../
 
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $<
-
 $(EXE): $(OBJS)
-	$(CXX) -o $@ $^ $(CXXFLAGS)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(INCFLAGS) $(LDLIBS)
+
+$(EXE).o: $(EXE).cpp
+	$(CXX) -c $< $(CXXFLAGS) $(INCFLAGS) $(LDLIBS)
+
+glob.o: glob.cpp
+	$(CXX) -c $< -O2 $(INCFLAGS)
 
 clean:
 	rm -f *.o

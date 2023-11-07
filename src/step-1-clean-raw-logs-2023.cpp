@@ -1,21 +1,5 @@
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <regex>
-#include <cmath>
-#include <algorithm>
-#include <csignal>
-
-#include <re2/re2.h>
-
-#include <fmt/core.h>
-
-#include "glob.h"
-#include "indicators.hpp"
-#include "rang.hpp"
-
+#include "main.h"
 
 using namespace std;
 using namespace rang;
@@ -44,6 +28,8 @@ string display_time() noexcept {
 
 
 void handle_sigint(const int signum) {
+    if (signum != 2)
+        throw runtime_error {"received unhandled signal"};
     cerr << endl << endl << fg::red << display_time() << "caught SIGINT" << endl;
     outfile.close();
     indicators::show_console_cursor(true);
@@ -123,7 +109,7 @@ int main() {
          << "Processing raw logs" << style::reset << endl << endl;
 
     const vector<string> input_files = get_files();
-    const double count = input_files.size();
+    const auto count = input_files.size();
     const string last_date = input_files[count-1].substr(24, 10);
     const string output_file = fmt::format("intermediate/cleaned-logs-{}.dat", last_date);
     const RE2 re1  { "^https?[^A-Za-z]*(.+?):\\d.+$" };
@@ -140,7 +126,7 @@ int main() {
 
     for (const auto& item : input_files) {
         ++counter;
-        uint8_t perc = static_cast<int>(round(counter/count*100));
+        uint8_t perc = static_cast<uint8_t>(round(counter/count*100));
         bar.set_option(option::PostfixText{
                 fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
