@@ -7,7 +7,7 @@ using namespace indicators;
 
 
 
-constexpr auto LOG_LOC {"./logs/i.ezproxy.nypl.org.2023-01-*.log"};
+constexpr auto LOG_LOC {"./logs/i.ezproxy.nypl.org.2023-*.log"};
 
 static ProgressBar bar{
         option::BarWidth{70},
@@ -22,12 +22,10 @@ static ProgressBar bar{
 };
 
 
-
 const string display_time() noexcept {
     string ret {fmt::format("[{}] ", to_string(time(0)))};
     return ret;
 }
-
 
 void handle_sigint(const int signum) {
     if (signum != 2)
@@ -38,29 +36,18 @@ void handle_sigint(const int signum) {
     exit(1);
 }
 
-
 const vector<string> get_files() noexcept {
     vector<string> input_files;
+    input_files.reserve(366);
     for (const auto& p : glob::glob(LOG_LOC)) {
-        input_files.push_back(p);
+        input_files.push_back(move(p));
     }
     sort(input_files.begin(), input_files.end());
     // remove last (incomplete log)
-    if (input_files.size() < 365)
+    if (input_files.size() < 365) // TODO: leap years?
         input_files.pop_back();
     return input_files;
 }
-
-
-inline const string make_tab_delimited(const string& ip, const string& barcode,
-                                const string& session,
-                                const string& date_and_time, const string& url,
-                                const string& fullurl) noexcept {
-    return fmt::format("{}\t{}\t{}\t{}\t{}\t{}\n",
-                       ip, barcode, session, date_and_time, url, fullurl);
-
-}
-
 
 void process_line(string* all_fields, const string& line) noexcept {
     uint8_t counter {0};
@@ -74,7 +61,6 @@ void process_line(string* all_fields, const string& line) noexcept {
             return;
     }
 }
-
 
 const string fix_whole_date(const string& adate) noexcept {
     struct tm tm{};
@@ -96,16 +82,17 @@ int main() {
          << style::bold << fg::cyan << display_time()
          << "Processing raw logs\n" << style::reset << endl;
 
-    const vector<string> input_files = get_files();
-    const auto count = input_files.size();
-    const string last_date = input_files[count-1].substr(24, 10);
-    const string output_file = fmt::format("intermediate/cleaned-logs-{}.dat", last_date);
+    const vector<string> input_files {get_files()};
+    const auto count {input_files.size()};
+    const string last_date {input_files[count-1].substr(24, 10)};
+    const string output_file {fmt::format("intermediate/cleaned-logs-{}.dat", last_date)};
     const RE2 re1  { "^https?[^A-Za-z]*(.+?):\\d.+$" };
     uint16_t counter { 0 };
 
     ofstream outfile {output_file};
-    outfile << make_tab_delimited("ip", "barcode", "session", "date_and_time",
-                                  "url", "fullurl");
+    outfile << fmt::format("{}\t{}\t{}\t{}\t{}\t{}\n",
+                           "ip", "barcode", "session", "date_and_time",
+                           "url", "fullurl");
 
     // reusing this to store the necessary fields
     string tmp[7];
@@ -127,17 +114,16 @@ int main() {
             string barcode  { move(tmp[1]) }; if (barcode == "-") continue;
             string ip       { move(tmp[0]) };
             string sessionp { move(tmp[2]) };
-            string date     { move(tmp[3]) };
+            string date     { fix_whole_date(move(tmp[3])) };
             string url      { move(tmp[6]) };
             string fullurl  { url };
 
             // fixing urls
             RE2::Replace(&url, re1, "\\1");
 
-            date = fix_whole_date(date);
-
-            outfile << make_tab_delimited(ip, barcode, sessionp, date, url,
-                                          fullurl);
+            outfile << fmt::format("{}\t{}\t{}\t{}\t{}\t{}\n",
+                                   ip, barcode, sessionp, date,
+                                   url, fullurl);
         }
     }
 
@@ -145,5 +131,4 @@ int main() {
     cout << style::bold << fg::green << display_time() << "Done!"
          << style::reset << fg::reset << endl;
 }
-
 
