@@ -32,7 +32,7 @@ string display_time() noexcept {
 void handle_sigint(const int signum) {
     if (signum != 2)
         throw runtime_error {"received unhandled signal"};
-    cerr << endl << endl << fg::red << display_time() << "caught SIGINT" << endl;
+    cerr << "\n" << fg::red << display_time() << "caught SIGINT\n";
     outfile.close();
     indicators::show_console_cursor(true);
     cerr << style::reset << endl;
@@ -57,7 +57,7 @@ inline const string make_tab_delimited(const string& ip, const string& barcode,
                                 const string& session,
                                 const string& date_and_time, const string& url,
                                 const string& fullurl) noexcept {
-    return fmt::format("{}\t{}\t{}\t{}\t{}\t{}",
+    return fmt::format("{}\t{}\t{}\t{}\t{}\t{}\n",
                        ip, barcode, session, date_and_time, url, fullurl);
 
 }
@@ -105,10 +105,10 @@ int main() {
 
     signal(SIGINT, handle_sigint);
 
-    cout << endl << endl << fg::gray << style::dim
-         << display_time() << "::alice glass:: HI!" << style::reset
-         << endl << style::bold << fg::cyan << display_time()
-         << "Processing raw logs" << style::reset << endl << endl;
+    cout << "\n\n" << fg::gray << style::dim
+         << display_time() << "::alice glass:: HI!\n" << style::reset
+         << style::bold << fg::cyan << display_time()
+         << "Processing raw logs\n" << style::reset << endl;
 
     const vector<string> input_files = get_files();
     const auto count = input_files.size();
@@ -119,7 +119,7 @@ int main() {
 
     outfile.open(output_file);
     outfile << make_tab_delimited("ip", "barcode", "session", "date_and_time",
-                                  "url", "fullurl") << endl;
+                                  "url", "fullurl");
 
     // reusing this to store the necessary fields
     string tmp[7];
@@ -133,20 +133,17 @@ int main() {
                 fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
 
-        ifstream infile(item);
-        string line;
+        ifstream infile {item};
+        string line {};
         while (getline(infile, line)) {
             process_line(tmp, line);
 
-            string ip       = tmp[0];
-            string barcode  = tmp[1];
-            string sessionp = tmp[2];
-            string date     = tmp[3];
-            string url      = tmp[6];
-            string fullurl  = url;
-
-            if (barcode == "-")
-                continue;
+            string barcode  { move(tmp[1]) }; if (barcode == "-") continue;
+            string ip       { move(tmp[0]) };
+            string sessionp { move(tmp[2]) };
+            string date     { move(tmp[3]) };
+            string url      { move(tmp[6]) };
+            string fullurl  { url };
 
             // fixing urls
             RE2::Replace(&url, re1, "\\1");
@@ -154,19 +151,13 @@ int main() {
             date = fix_whole_date(date);
 
             outfile << make_tab_delimited(ip, barcode, sessionp, date, url,
-                                          fullurl) << endl;
+                                          fullurl);
         }
-        infile.close();
     }
-    cout << endl << endl << style::bold << fg::cyan << display_time()
-         << "Closing output file" << endl;
 
-    outfile.close();
     show_console_cursor(true);
-
-    cout << style::bold << fg::green << display_time()
-         << "Done!" << endl;
-    cout << style::reset << fg::reset;
+    cout << style::bold << fg::green << display_time() << "Done!"
+         << style::reset << fg::reset << endl;
 }
 
 
