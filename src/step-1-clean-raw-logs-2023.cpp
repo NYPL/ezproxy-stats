@@ -8,7 +8,6 @@ using namespace indicators;
 
 
 constexpr auto LOG_LOC {"./logs/i.ezproxy.nypl.org.2023-01-*.log"};
-static ofstream outfile {};
 
 static ProgressBar bar{
         option::BarWidth{70},
@@ -24,18 +23,18 @@ static ProgressBar bar{
 
 
 
-string display_time() noexcept {
-    return ("[" + to_string(time(0)) + "]  ");
+const string display_time() noexcept {
+    string ret {fmt::format("[{}] ", to_string(time(0)))};
+    return ret;
 }
 
 
 void handle_sigint(const int signum) {
     if (signum != 2)
         throw runtime_error {"received unhandled signal"};
-    cerr << "\n" << fg::red << display_time() << "caught SIGINT\n";
-    outfile.close();
     indicators::show_console_cursor(true);
-    cerr << style::reset << endl;
+    cerr << "\n" << fg::red << display_time() << "caught SIGINT\n"
+         << style::reset << endl;
     exit(1);
 }
 
@@ -64,13 +63,13 @@ inline const string make_tab_delimited(const string& ip, const string& barcode,
 
 
 void process_line(string* all_fields, const string& line) noexcept {
-    uint8_t counter = 0;
-    string item;
-    stringstream ss (line);
+    uint8_t counter {0};
+    string item {};
+    stringstream ss {line};
 
     while (getline(ss, item, ' ')) {
-        all_fields[counter] = item;
-        counter++;
+        all_fields[counter] = move(item);
+        ++counter;
         if (counter > 6)
             return;
     }
@@ -78,25 +77,12 @@ void process_line(string* all_fields, const string& line) noexcept {
 
 
 const string fix_whole_date(const string& adate) noexcept {
-    const string day  = adate.substr(1, 2);
-    const string year = adate.substr(8, 4);
-    const string time = adate.substr(13, string::npos);
-    string premonth   = adate.substr(4, 3);
-
-    if      (premonth == "Jan") premonth = "01";
-    else if (premonth == "Feb") premonth = "02";
-    else if (premonth == "Mar") premonth = "03";
-    else if (premonth == "Apr") premonth = "04";
-    else if (premonth == "May") premonth = "05";
-    else if (premonth == "Jun") premonth = "06";
-    else if (premonth == "Jul") premonth = "07";
-    else if (premonth == "Aug") premonth = "08";
-    else if (premonth == "Sep") premonth = "09";
-    else if (premonth == "Oct") premonth = "10";
-    else if (premonth == "Nov") premonth = "11";
-    else if (premonth == "Dec") premonth = "12";
-
-    return fmt::format("{}-{}-{} {}", year, premonth, day, time);
+    struct tm tm{};
+    strptime(adate.c_str(), "[%d/%b/%Y:%T", &tm);
+    char datestring[20] {0};
+    strftime(datestring, 20, "%F %T", &tm);
+    string ret {datestring};
+    return ret;
 }
 
 
@@ -117,7 +103,7 @@ int main() {
     const RE2 re1  { "^https?[^A-Za-z]*(.+?):\\d.+$" };
     uint16_t counter { 0 };
 
-    outfile.open(output_file);
+    ofstream outfile {output_file};
     outfile << make_tab_delimited("ip", "barcode", "session", "date_and_time",
                                   "url", "fullurl");
 
