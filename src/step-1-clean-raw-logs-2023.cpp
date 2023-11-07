@@ -6,7 +6,9 @@ using namespace rang;
 using namespace indicators;
 
 
-static ofstream outfile;
+
+constexpr auto LOG_LOC {"./logs/i.ezproxy.nypl.org.2023-01-*.log"};
+static ofstream outfile {};
 
 static ProgressBar bar{
         option::BarWidth{70},
@@ -40,7 +42,7 @@ void handle_sigint(const int signum) {
 
 const vector<string> get_files() noexcept {
     vector<string> input_files;
-    for (const auto& p : glob::glob("./logs/i.ezproxy.nypl.org.2023-*.log")) {
+    for (const auto& p : glob::glob(LOG_LOC)) {
         input_files.push_back(p);
     }
     sort(input_files.begin(), input_files.end());
@@ -126,7 +128,7 @@ int main() {
 
     for (const auto& item : input_files) {
         ++counter;
-        uint8_t perc = static_cast<uint8_t>(round(counter/count*100));
+        auto perc = static_cast<uint8_t>(round(counter*100/count));
         bar.set_option(option::PostfixText{
                 fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
