@@ -42,6 +42,7 @@ const vector<string> get_files() noexcept {
     for (const auto& p : glob::glob(LOG_LOC)) {
         input_files.push_back(p);
         #ifdef SAMPLE
+        // if (input_files.size() > 2) break;
         if (input_files.size() > 25) break;
         #endif
     }
@@ -81,7 +82,7 @@ const char* get_small_url(string fullurl) {
     if (starting_point==nullptr)
         throw std::runtime_error {fmt::format("URL string ({}) malformed", fullurl)};
     starting_point++;
-    char* ending_point   { static_cast<char*>(memchr(starting_point, ':', urlsize-10)) };
+    char* ending_point { static_cast<char*>(memchr(starting_point, ':', urlsize-10)) };
     if (ending_point==nullptr)
         throw std::runtime_error {fmt::format("URL string ({}) malformed", fullurl)};
     *ending_point = '\0';
@@ -125,9 +126,11 @@ int main() {
                 fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
 
-        ifstream infile {item};
-        string line {};
-        while (std::getline(infile, line)) {
+        FILE* infile { fopen(item.c_str(), "r") };
+        char* line   {nullptr};
+        size_t size  {0};
+        ssize_t read {0};
+        while ((read = getline(&line, &size, infile)) != -1) {
             process_line(tmp, line);
 
             string barcode  { move(tmp[1]) }; if (barcode == "-") continue;
