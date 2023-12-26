@@ -16,3 +16,5 @@ notes
 *.a
 *.so
 step-1-clean-raw-logs-2023
+gmon.out
+callgrind.out.*
