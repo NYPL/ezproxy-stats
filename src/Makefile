@@ -1,4 +1,7 @@
 
+
+COMPTYPE  := debug
+
 EXE=step-1-clean-raw-logs-2023
 
 CXX 	  := g++
@@ -14,6 +17,12 @@ CXXFLAGS  += -Wuninitialized -Wswitch-enum -Wswitch
 INCFLAGS  := -I$(INCDIR)
 LDLIBS    := -lre2 -lfmt
 
+ifeq ($(COMPTYPE), debug)
+	# CXXFLAGS += -fsanitize=address -fsanitize=undefined
+	# CXXFLAGS  += -g -pg
+	CXXFLAGS  += -DSAMPLE
+endif
+
 SRCS      := step-1-clean-raw-logs-2023.cpp glob.cpp
 OBJS      := $(subst .cpp,.o,$(SRCS))
 
@@ -22,7 +31,7 @@ OBJS      := $(subst .cpp,.o,$(SRCS))
 all: $(EXE)
 	cp $(EXE) ../
 
-$(EXE): $(OBJS)
+$(EXE): $(OBJS) -lre2 -lfmt
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(INCFLAGS) $(LDLIBS)
 
 $(EXE).o: $(EXE).cpp
