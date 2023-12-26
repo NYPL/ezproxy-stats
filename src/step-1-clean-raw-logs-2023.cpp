@@ -40,7 +40,10 @@ const vector<string> get_files() noexcept {
     vector<string> input_files;
     input_files.reserve(366);
     for (const auto& p : glob::glob(LOG_LOC)) {
-        input_files.push_back(move(p));
+        input_files.push_back(p);
+        #ifdef SAMPLE
+        if (input_files.size() > 25) break;
+        #endif
     }
     sort(input_files.begin(), input_files.end());
     // remove last (incomplete log)
@@ -87,12 +90,11 @@ int main() {
     const string last_date {input_files[count-1].substr(24, 10)};
     const string output_file {fmt::format("intermediate/cleaned-logs-{}.dat", last_date)};
     const RE2 re1  { "^https?[^A-Za-z]*(.+?):\\d.+$" };
-    uint16_t counter { 0 };
+    uint32_t counter { 0 };
 
-    ofstream outfile {output_file};
-    outfile << fmt::format("{}\t{}\t{}\t{}\t{}\t{}\n",
-                           "ip", "barcode", "session", "date_and_time",
-                           "url", "fullurl");
+    FILE* outfile { fopen(output_file.c_str(), "w") };
+    fmt::print(outfile, "{}\t{}\t{}\t{}\t{}\t{}\n",
+               "ip", "barcode", "session", "date_and_time", "url", "fullurl");
 
     // reusing this to store the necessary fields
     string tmp[7];
@@ -101,7 +103,7 @@ int main() {
 
     for (const auto& item : input_files) {
         ++counter;
-        auto perc = static_cast<uint8_t>(round(counter*100/count));
+        const auto perc { static_cast<size_t>(std::round(counter*100/count)) };
         bar.set_option(option::PostfixText{
                 fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
@@ -121,9 +123,8 @@ int main() {
             // fixing urls
             RE2::Replace(&url, re1, "\\1");
 
-            outfile << fmt::format("{}\t{}\t{}\t{}\t{}\t{}\n",
-                                   ip, barcode, sessionp, date,
-                                   url, fullurl);
+            fmt::print(outfile, "{}\t{}\t{}\t{}\t{}\t{}\n",
+                       ip, barcode, sessionp, date, url, fullurl);
         }
     }
 
