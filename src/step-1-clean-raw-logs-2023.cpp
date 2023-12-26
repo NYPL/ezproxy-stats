@@ -126,6 +126,7 @@ int main() {
                 fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
 
+    #ifndef IOSTREAMINPUT
         char* line    {nullptr};
         size_t size   {0};
         ssize_t read  {0};
@@ -133,6 +134,11 @@ int main() {
         const auto fd { fileno(infile) };
         posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
         while ((read = getline(&line, &size, infile)) != -1) {
+    #else
+        ifstream infile {item};
+        string line {};
+        while (std::getline(infile, line)) {
+    #endif
             process_line(tmp, line);
 
             string barcode  { move(tmp[1]) }; if (barcode == "-") continue;
@@ -145,7 +151,9 @@ int main() {
             fmt::print(outfile, "{}\t{}\t{}\t{}\t{}\t{}\n",
                        ip, barcode, sessionp, date, url, fullurl);
         }
+    #ifndef IOSTREAMINPUT
         fclose(infile);
+    #endif
     }
 
     show_console_cursor(true);

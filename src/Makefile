@@ -14,6 +14,7 @@ CXXFLAGS  += -Wnormalized -Wold-style-cast -Wrange-loop-construct
 CXXFLAGS  += -Wreturn-local-addr -Wredundant-move -Wsuggest-final-types
 CXXFLAGS  += -Wsuggest-override -Wvirtual-inheritance -Wvirtual-move-assign
 CXXFLAGS  += -Wuninitialized -Wswitch-enum -Wswitch
+CXXFLAGS  += -DIOSTREAMINPUT
 INCFLAGS  := -I$(INCDIR)
 LDLIBS    := -lfmt
 
