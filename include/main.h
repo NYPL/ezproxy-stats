@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <csignal>
 #include <ctime>
+#include <fcntl.h>
 
 #pragma GCC system_header
 #include <fmt/core.h>

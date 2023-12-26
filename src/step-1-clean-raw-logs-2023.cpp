@@ -126,10 +126,12 @@ int main() {
                 fmt::format("  {}/{}  {}%", counter, count, perc) });
         bar.set_progress(perc);
 
-        FILE* infile { fopen(item.c_str(), "r") };
-        char* line   {nullptr};
-        size_t size  {0};
-        ssize_t read {0};
+        char* line    {nullptr};
+        size_t size   {0};
+        ssize_t read  {0};
+        FILE* infile  { fopen(item.c_str(), "r") };
+        const auto fd { fileno(infile) };
+        posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
         while ((read = getline(&line, &size, infile)) != -1) {
             process_line(tmp, line);
 
@@ -143,6 +145,7 @@ int main() {
             fmt::print(outfile, "{}\t{}\t{}\t{}\t{}\t{}\n",
                        ip, barcode, sessionp, date, url, fullurl);
         }
+        fclose(infile);
     }
 
     show_console_cursor(true);
