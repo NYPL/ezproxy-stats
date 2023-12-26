@@ -15,7 +15,7 @@ CXXFLAGS  += -Wreturn-local-addr -Wredundant-move -Wsuggest-final-types
 CXXFLAGS  += -Wsuggest-override -Wvirtual-inheritance -Wvirtual-move-assign
 CXXFLAGS  += -Wuninitialized -Wswitch-enum -Wswitch
 INCFLAGS  := -I$(INCDIR)
-LDLIBS    := -lre2 -lfmt
+LDLIBS    := -lfmt
 
 ifeq ($(COMPTYPE), debug)
 	# CXXFLAGS += -fsanitize=address -fsanitize=undefined
@@ -31,7 +31,7 @@ OBJS      := $(subst .cpp,.o,$(SRCS))
 all: $(EXE)
 	cp $(EXE) ../
 
-$(EXE): $(OBJS) -lre2 -lfmt
+$(EXE): $(OBJS) -lfmt
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(INCFLAGS) $(LDLIBS)
 
 $(EXE).o: $(EXE).cpp

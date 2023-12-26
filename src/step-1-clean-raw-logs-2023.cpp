@@ -57,7 +57,7 @@ void process_line(string* all_fields, const string& line) noexcept {
     string item {};
     stringstream ss {line};
 
-    while (getline(ss, item, ' ')) {
+    while (std::getline(ss, item, ' ')) {
         all_fields[counter] = move(item);
         ++counter;
         if (counter > 6)
@@ -74,9 +74,27 @@ const string fix_whole_date(const string& adate) noexcept {
     return ret;
 }
 
+const char* get_small_url(string fullurl) {
+    const auto urlsize   { fullurl.size() };
+    char* cfullurl       { const_cast<char*>(fullurl.c_str()) };
+    char* starting_point { static_cast<char*>(memrchr(cfullurl, '/', 10)) };
+    if (starting_point==nullptr)
+        throw std::runtime_error {fmt::format("URL string ({}) malformed", fullurl)};
+    starting_point++;
+    char* ending_point   { static_cast<char*>(memchr(starting_point, ':', urlsize-10)) };
+    if (ending_point==nullptr)
+        throw std::runtime_error {fmt::format("URL string ({}) malformed", fullurl)};
+    *ending_point = '\0';
+    // special case for "58122.on.worldcat.org" (and possibly more)
+    if (isdigit(starting_point[0])) {
+        char* new_starting_p { static_cast<char*>(memchr(starting_point, '.', urlsize-10)) };
+        if (isdigit(*(new_starting_p-1)))
+            starting_point = new_starting_p+1;
+    }
+    return starting_point;
+}
 
 int main() {
-    using namespace re2;
 
     signal(SIGINT, handle_sigint);
 
@@ -85,19 +103,18 @@ int main() {
          << style::bold << fg::cyan << display_time()
          << "Processing raw logs\n" << style::reset << endl;
 
-    const vector<string> input_files {get_files()};
-    const auto count {input_files.size()};
-    const string last_date {input_files[count-1].substr(24, 10)};
+    const vector<string> input_files { get_files() };
+    const auto count                 { input_files.size() };
+    const string last_date           { input_files[count-1].substr(24, 10) };
+    uint32_t counter                 { 0 };
     const string output_file {fmt::format("intermediate/cleaned-logs-{}.dat", last_date)};
-    const RE2 re1  { "^https?[^A-Za-z]*(.+?):\\d.+$" };
-    uint32_t counter { 0 };
 
     FILE* outfile { fopen(output_file.c_str(), "w") };
     fmt::print(outfile, "{}\t{}\t{}\t{}\t{}\t{}\n",
                "ip", "barcode", "session", "date_and_time", "url", "fullurl");
 
     // reusing this to store the necessary fields
-    string tmp[7];
+    string tmp[7] {};
 
     show_console_cursor(false);
 
@@ -110,18 +127,15 @@ int main() {
 
         ifstream infile {item};
         string line {};
-        while (getline(infile, line)) {
+        while (std::getline(infile, line)) {
             process_line(tmp, line);
 
             string barcode  { move(tmp[1]) }; if (barcode == "-") continue;
             string ip       { move(tmp[0]) };
             string sessionp { move(tmp[2]) };
             string date     { fix_whole_date(move(tmp[3])) };
-            string url      { move(tmp[6]) };
-            string fullurl  { url };
-
-            // fixing urls
-            RE2::Replace(&url, re1, "\\1");
+            string fullurl  { move(tmp[6]) };
+            string url      { get_small_url(fullurl) };
 
             fmt::print(outfile, "{}\t{}\t{}\t{}\t{}\t{}\n",
                        ip, barcode, sessionp, date, url, fullurl);

@@ -9,7 +9,6 @@
 #include <ctime>
 
 #pragma GCC system_header
-#include <re2/re2.h>
 #include <fmt/core.h>
 
 #include "glob.h"
