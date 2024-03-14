@@ -2,7 +2,7 @@
 
 COMPTYPE  := debug
 
-EXE=step-1-clean-raw-logs-2023
+EXE=step-1-clean-raw-logs
 
 CXX 	  := g++
 INCDIR    := ../include
@@ -21,10 +21,10 @@ LDLIBS    := -lfmt
 ifeq ($(COMPTYPE), debug)
 	# CXXFLAGS += -fsanitize=address -fsanitize=undefined
 	# CXXFLAGS  += -g -pg
-	CXXFLAGS  += -DSAMPLE
+	# CXXFLAGS  += -DSAMPLE
 endif
 
-SRCS      := step-1-clean-raw-logs-2023.cpp glob.cpp
+SRCS      := $(EXE).cpp glob.cpp
 OBJS      := $(subst .cpp,.o,$(SRCS))
 
 .PHONY: all clean

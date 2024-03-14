@@ -25,6 +25,7 @@ library(openssl)
 
 # ------------------------------ #
 
+CURRENT_YEAR <- format(Sys.Date(), "%Y")
 
 proxy <- fread_plus_date("intermediate/cleaned-logs.dat",
                          colClasses="character")
@@ -77,6 +78,7 @@ proxy[, just_date:=as.Date(str_sub(date_and_time, 1, 10))]
 
 set_lb_date(proxy, lb_date)
 
+output_file <- sprintf("target/ezproxy_%s-up-to.dat.gz", CURRENT_YEAR)
 proxy %>%
-  fwrite_plus_date("target/ezproxy_2023-up-to.dat.gz", sep=",")
+  fwrite_plus_date(output_file, sep=",")
 

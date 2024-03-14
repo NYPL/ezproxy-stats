@@ -1,5 +1,5 @@
 
-EXE=step-1-clean-raw-logs-2023
+EXE=step-1-clean-raw-logs
 
 .PHONY: all clean
 

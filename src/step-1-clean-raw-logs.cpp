@@ -6,8 +6,10 @@ using namespace rang;
 using namespace indicators;
 
 
+int get_current_year(void);
+const int CURRENT_YEAR {get_current_year()};
 
-constexpr auto LOG_LOC {"./logs/i.ezproxy.nypl.org.2023-*.log"};
+const auto LOG_LOC {fmt::format("./logs/i.ezproxy.nypl.org.{}-*.log", CURRENT_YEAR)};
 
 static ProgressBar bar{
         option::BarWidth{70},
@@ -21,6 +23,11 @@ static ProgressBar bar{
         option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}
 };
 
+int get_current_year() {
+  using namespace std::chrono;
+  return static_cast<int>(
+      year_month_day{time_point_cast<days>(system_clock::now())}.year());
+}
 
 const string display_time() noexcept {
     string ret {fmt::format("[{}] ", to_string(time(0)))};

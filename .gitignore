@@ -15,6 +15,7 @@ notes
 *.o
 *.a
 *.so
-step-1-clean-raw-logs-2023
+step-1-clean-raw-log*
+src/step-1-clean-raw-log*
 gmon.out
 callgrind.out.*
