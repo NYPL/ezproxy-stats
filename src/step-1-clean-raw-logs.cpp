@@ -24,9 +24,15 @@ static ProgressBar bar{
 };
 
 int get_current_year() {
-  using namespace std::chrono;
-  return static_cast<int>(
+    using namespace std::chrono;
+    return static_cast<int>(
       year_month_day{time_point_cast<days>(system_clock::now())}.year());
+}
+
+uint32_t num_days_in_year(int year) {
+    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
+        return 366;
+    return 365;
 }
 
 const string display_time() noexcept {
@@ -55,7 +61,7 @@ const vector<string> get_files() noexcept {
     }
     sort(input_files.begin(), input_files.end());
     // remove last (incomplete log)
-    if (input_files.size() < 365) // TODO: leap years?
+    if (input_files.size() < num_days_in_year(CURRENT_YEAR))
         input_files.pop_back();
     return input_files;
 }
